@@ -1,6 +1,9 @@
-import React from "react";
-import { Flex, Input, Button, Heading, Text } from "@chakra-ui/react";
+import { Flex, Input, Button, Heading, Text, Spinner } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../redux/userActions";
+import { toaster } from "../components/ui/toaster";
 
 const formFields = [
   { type: "email", name: "email", placeholder: "Enter Email Address" },
@@ -9,9 +12,47 @@ const formFields = [
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { status, error } = useSelector((state) => state.user);
+  const [loginData, setLoginData] = useState({
+    email: "",
+    password: "",
+  });
+
+  function handleLoginData(e) {
+    const { name, value } = e.target;
+    setLoginData((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function handleLoginSubmit(e) {
+    e.preventDefault();
+    const { email, password } = loginData;
+    if (email === "" || password === "") {
+      return;
+    }
+    dispatch(loginUser(loginData));
+    if (status === "Completed") {
+      toaster.create({ title: "Login Successful", type: "success" });
+      setLoginData({
+        email: "",
+        password: "",
+      });
+      navigate("/course");
+    }
+  }
+
+  useEffect(() => {
+    if (status === "Failed" && error) {
+      toaster.create({
+        type: "error",
+        title: `Login failed : ${error}`,
+      });
+    }
+  }, [status, error, navigate]);
   return (
     <Flex w="100%" h="90vh" bg="blue.50" justify="center" align="center">
       <form
+        onSubmit={handleLoginSubmit}
         style={{
           maxWidth: "500px",
           width: "50%",
@@ -31,7 +72,9 @@ const Login = () => {
               key={index}
               name={field.name}
               type={field.type}
+              value={loginData[field.name]}
               placeholder={field.placeholder}
+              onChange={handleLoginData}
               variant="outline"
               borderColor="gray.300"
               _hover={{ borderColor: "gray.400" }}
@@ -39,6 +82,32 @@ const Login = () => {
               height="40px"
             />
           ))}
+
+          {status === "Loading" && (
+            <Flex>
+              <Spinner size={"lg"} color={"teal"} />
+              <Text>Loading ....</Text>
+            </Flex>
+          )}
+
+          <Text
+            color={
+              status === "Failed"
+                ? "red"
+                : status === "Completed"
+                ? "green"
+                : null
+            }
+            fontWeight={"bold"}
+            textAlign={"center"}
+          >
+            {status === "Failed"
+              ? error
+              : status === "Completed"
+              ? "Login Successful"
+              : null}
+          </Text>
+
           <Text textAlign="center" mt={4} cursor={"pointer"}>
             Don't have an account?{" "}
             <span
@@ -55,6 +124,7 @@ const Login = () => {
             colorPalette="teal"
             color="white"
             mt={4}
+            disabled={status === "Loading"}
           >
             Login
           </Button>

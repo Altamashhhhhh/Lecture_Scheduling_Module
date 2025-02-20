@@ -72,7 +72,12 @@ userRouter.post("/login", async (req, res) => {
     );
     res
       .status(200)
-      .json({ message: "Login Successfull", success: true, token });
+      .json({
+        message: "Login Successfull",
+        success: true,
+        token,
+        user: { name: user.name, role: user.role, email: user.email },
+      });
   } catch (error) {
     res.status(500).json({
       message: "An error occured while login. Please try again later.",
@@ -82,57 +87,67 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
-userRouter.get("/instructors", [authentication , authorization(["admin"])], async (req, res) => {
-  try {
-    const instructors = await userModel.find({ role: "instructor" });
-    res.status(200).json({ instructors });
-  } catch (error) {
-    res.status(500).json({
-      message:
-        "An error occured while fetching all instructors , Please try again later.",
-      success: false,
-      error: error.message,
-    });
+userRouter.get(
+  "/instructors",
+  [authentication, authorization(["admin"])],
+  async (req, res) => {
+    try {
+      const instructors = await userModel.find({ role: "instructor" });
+      res.status(200).json({ instructors });
+    } catch (error) {
+      res.status(500).json({
+        message:
+          "An error occured while fetching all instructors , Please try again later.",
+        success: false,
+        error: error.message,
+      });
+    }
   }
-});
+);
 
-userRouter.get("/users", [authentication , authorization(["admin"])], async (req, res) => {
-  try {
-    const users = await userModel.find();
-    res.status(200).json({ users });
-  } catch (error) {
-    res.status(500).json({
-      message:
-        "An error occured while fetching all users , Please try again later.",
-      success: false,
-      error: error.message,
-    });
+userRouter.get(
+  "/users",
+  [authentication, authorization(["admin"])],
+  async (req, res) => {
+    try {
+      const users = await userModel.find();
+      res.status(200).json({ users });
+    } catch (error) {
+      res.status(500).json({
+        message:
+          "An error occured while fetching all users , Please try again later.",
+        success: false,
+        error: error.message,
+      });
+    }
   }
-});
+);
 
-userRouter.patch("/update-user/:id", [authentication , authorization(["admin"])] ,  async (req, res) => {
-  const { id } = req.params;
-  try {
-    const updatedUser = await userModel.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-    if (!updatedUser) {
-      return res
-        .status(404)
-        .json({
+userRouter.patch(
+  "/update-user/:id",
+  [authentication, authorization(["admin"])],
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const updatedUser = await userModel.findByIdAndUpdate(id, req.body, {
+        new: true,
+      });
+      if (!updatedUser) {
+        return res.status(404).json({
           message: "User not found, Please check the ID and try again ",
           success: false,
         });
+      }
+      res.status(200).json({ message: "User updated successfully" });
+    } catch (error) {
+      return req.status(500).json({
+        message:
+          "An error occurred while updating the user. Please try again later.",
+        success: false,
+        error: error.message,
+      });
     }
-    res.status(200).json({ message: "User updated successfully" });
-  } catch (error) {
-    return req.status(500).json({
-      message:
-        "An error occurred while updating the user. Please try again later.",
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 module.exports = userRouter;
