@@ -34,3 +34,41 @@ export const loginUser = createAsyncThunk(
     }
   }
 );
+
+export const fetchInstructors = createAsyncThunk(
+  "user/instructors",
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${URL}/user/instructors`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response.data.instructors);
+      return response.data.instructors;
+    } catch (error) {
+      console.log(error.response.data.message);
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const updateInstructor = createAsyncThunk(
+  "user/update-user",
+  async ({ id, updatedData, token }, { rejectWithValue }) => {
+    try {
+      const response = await axios.patch(
+        `${URL}/user/update-user/${id}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.respo.data.message);
+    }
+  }
+);

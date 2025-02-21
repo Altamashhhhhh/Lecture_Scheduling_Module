@@ -19,36 +19,36 @@ const Login = () => {
     password: "",
   });
 
-  function handleLoginData(e) {
+  const handleLoginData = (e) => {
     const { name, value } = e.target;
     setLoginData((prev) => ({ ...prev, [name]: value }));
-  }
+  };
 
-  function handleLoginSubmit(e) {
+  const handleLoginSubmit = (e) => {
     e.preventDefault();
     const { email, password } = loginData;
     if (email === "" || password === "") {
       return;
     }
     dispatch(loginUser(loginData));
+  };
+
+  useEffect(() => {
     if (status === "Completed") {
       toaster.create({ title: "Login Successful", type: "success" });
       setLoginData({
         email: "",
         password: "",
       });
-      navigate("/course");
-    }
-  }
-
-  useEffect(() => {
-    if (status === "Failed" && error) {
+      navigate("/");
+    } else if (status === "Failed" && error) {
       toaster.create({
         type: "error",
-        title: `Login failed : ${error}`,
+        title: `Login failed: ${error}`,
       });
     }
   }, [status, error, navigate]);
+
   return (
     <Flex w="100%" h="90vh" bg="blue.50" justify="center" align="center">
       <form
