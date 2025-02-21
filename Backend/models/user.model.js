@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema({
     trim: true,
   },
   password: { type: String, required: true, trim: true },
+  assignedBatches: [{ type: mongoose.Schema.Types.ObjectId, ref: "batch" }]   
 });
 
 const userModel = mongoose.model("user", userSchema);
