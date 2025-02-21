@@ -14,7 +14,7 @@ courseRouter.post(
         level,
         image,
         description,
-        batches: batches.split(","),
+        batches 
       });
       await course.save();
       res.status(201).json({ message: "Course Created Successful", course });
