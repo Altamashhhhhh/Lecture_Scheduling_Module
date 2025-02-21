@@ -59,4 +59,15 @@ batchRouter.get("/", authentication, async (req, res) => {
   }
 });
 
+batchRouter.get("/instructor-batches", authentication, async (req, res) => {
+  try {
+    const instructorId = req.user.id;  
+    const batches = await batchModel.find({ instructor: instructorId }).populate("course", "name description");
+    
+    res.status(200).json({ batches });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching instructor batches", error: error.message });
+  }
+});
+
 module.exports = batchRouter;
